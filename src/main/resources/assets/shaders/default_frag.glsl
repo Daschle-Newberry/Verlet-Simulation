@@ -1,0 +1,7 @@
+#version 420 core
+
+out vec4 outColor;
+
+void main() {
+    outColor = vec4(.5,.5,.5,1.0f);
+}
