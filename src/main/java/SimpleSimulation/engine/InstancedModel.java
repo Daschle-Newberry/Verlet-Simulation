@@ -35,7 +35,7 @@ public class InstancedModel extends Model{
         instances = amount;
         float[] vertexArray = loadModelFile(filepath);
 
-        vertexCount = (int)vertexArray.length/6;
+        vertexCount = (int)vertexArray.length/3;
         //VAO
         VAO  = glGenVertexArrays();
         glBindVertexArray(VAO);
@@ -52,29 +52,31 @@ public class InstancedModel extends Model{
 
         // XYZ
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,3,GL_FLOAT,false,6 * floatBytes,0);
+        glVertexAttribPointer(0,3,GL_FLOAT,false,3 * floatBytes,0);
 
-        // Colors
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,3,GL_FLOAT,false,6 * floatBytes,3 * floatBytes);
+
 
         glBindBuffer(GL_ARRAY_BUFFER,0);
 
         //Instances
         instanceVBO = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER,instanceVBO);
-        instanceBuffer = BufferUtils.createFloatBuffer(16*instances);
+        instanceBuffer = BufferUtils.createFloatBuffer(19*instances);
         glBufferData(GL_ARRAY_BUFFER,instanceBuffer,GL_DYNAMIC_DRAW);
 
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1,4,GL_FLOAT,false,4 * vec4Size + 3 * floatBytes,0);
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2,4,GL_FLOAT,false,4 * vec4Size,0);
+        glVertexAttribPointer(2,4,GL_FLOAT,false,4 * vec4Size + 3 * floatBytes, vec4Size);
         glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3,4,GL_FLOAT,false,4 * vec4Size, vec4Size);
+        glVertexAttribPointer(3,4,GL_FLOAT,false,4 * vec4Size + 3 * floatBytes,2 * vec4Size);
         glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4,4,GL_FLOAT,false,4 * vec4Size,2 * vec4Size);
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5,4,GL_FLOAT,false,4 * vec4Size,3 * vec4Size);
+        glVertexAttribPointer(4,4,GL_FLOAT,false,4 * vec4Size + 3 * floatBytes,3 * vec4Size);
 
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5,3,GL_FLOAT,false,4 * vec4Size + 3 * floatBytes,4 * vec4Size);
+
+        glVertexAttribDivisor(1,1);
         glVertexAttribDivisor(2,1);
         glVertexAttribDivisor(3,1);
         glVertexAttribDivisor(4,1);
@@ -82,16 +84,26 @@ public class InstancedModel extends Model{
 
         glBindBuffer(GL_ARRAY_BUFFER,0);
 
-        tmpBuffer = new float[16];
+        tmpBuffer = new float[19];
 
     }
 
     public void setBufferData(float[] positions){
-        for(int i = 0; i < instances*2; i+=2){
-            Matrix4f modelMatrix = new Matrix4f().translation(positions[i],positions[i+1],0);
+        int index = 0;
+        for(int i = 0; i < instances; i++){
+            Matrix4f modelMatrix = new Matrix4f().translation(positions[index],positions[index+1],0);
             modelMatrix.mul(this.scale,modelMatrix);
+
             modelMatrix.get(tmpBuffer);
+            tmpBuffer[16] = positions[index+2];
+            tmpBuffer[17] = positions[index+3];
+            tmpBuffer[18] = positions[index+4];
+
+
             instanceBuffer.put(tmpBuffer);
+
+
+            index += 5;
         }
 
         glBindBuffer(GL_ARRAY_BUFFER,instanceVBO);

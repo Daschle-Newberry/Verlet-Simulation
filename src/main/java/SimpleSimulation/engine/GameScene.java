@@ -3,6 +3,7 @@ package SimpleSimulation.engine;
 import SimpleSimulation.engine.Camera;
 import SimpleSimulation.engine.postprocessing.ScreenBuffer;
 import SimpleSimulation.engine.simulation.BallSimulation;
+import SimpleSimulation.engine.simulation.BoundingBox;
 import SimpleSimulation.renderer.Shader;
 import SimpleSimulation.renderer.Shaders;
 import org.joml.Matrix4f;
@@ -16,30 +17,29 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class GameScene extends Scene{
 
-    Camera camera;
+    private Camera camera;
 
     private InstancedModel circle;
-    private int particleCount;
 
     private BallSimulation simulation;
-
     private ScreenBuffer screenBuffer;
+
+
+
 
     @Override
     public void init() {
         Shaders.loadShaders();
-        particleCount = 100;
-        circle = new InstancedModel("/assets/models/circle.obj",particleCount,.05f);
-        simulation =  new BallSimulation(particleCount,1,1,1);
+        int particleCount = 10;
+        float particleRadius = .002f;
+        circle = new InstancedModel("/assets/models/circle.obj",particleCount,particleRadius);
+        simulation =  new BallSimulation(particleCount,particleRadius,1f);
 
 
         camera = new Camera(new Vector3f(0.0f,0.0f,-1.0f),0);
 
 
         screenBuffer = new ScreenBuffer();
-
-
-
 
     }
 
@@ -50,7 +50,8 @@ public class GameScene extends Scene{
 
     @Override
     public void update(double dt) {
-        float[] positions = simulation.update(dt,3);
+
+        float[] positions = simulation.update(dt);
         circle.setBufferData(positions);
         render();
     }

@@ -99,10 +99,6 @@ public abstract class Model {
                 vertexAttributesList.add(position.y());
                 vertexAttributesList.add(position.z());
 
-                vertexAttributesList.add(.5f);
-                vertexAttributesList.add(.5f);
-                vertexAttributesList.add(1.0f);
-
 
             }
         }
