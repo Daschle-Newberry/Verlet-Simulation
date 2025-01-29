@@ -2,10 +2,14 @@ package SimpleSimulation.engine;
 
 import SimpleSimulation.engine.input.KeyListener;
 import SimpleSimulation.engine.input.MouseListener;
+import SimpleSimulation.util.Data;
 import SimpleSimulation.util.Time;
+import org.jfree.data.json.JSONUtils;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
+
+import java.sql.SQLOutput;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -67,6 +71,16 @@ public class Window {
         System.out.println("Hello LWJGL" + Version.getVersion());
         init();
         loop();
+
+        System.out.println("AVG simulation update time " + Data.simulationUpdateTime/Data.simulationUpdates);
+        System.out.println("            AVG grid creation time " + Data.gridCreationtime/totalFrames);
+        System.out.println("            AVG collision check time " + Data.collisionTime/totalFrames);
+        System.out.println("                        AVG neighbor finding time " + Data.timeSpentCreatingNeighbors / totalFrames);
+        System.out.println("                        AVG collision correction time " + Data.timeSpentCorrecting/totalFrames);
+        System.out.println("                        Total collision checks " + Data.collisionChecks);
+        System.out.println("                        Collision checks per frame " + Data.collisionChecks/totalFrames);
+        System.out.println("                        Cell checks per frame " + Data.cellChecks/totalFrames);
+
 
         //Free Memory
         glfwFreeCallbacks(glfwWindow);

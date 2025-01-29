@@ -6,6 +6,8 @@ import SimpleSimulation.engine.simulation.BallSimulation;
 import SimpleSimulation.engine.simulation.BoundingBox;
 import SimpleSimulation.renderer.Shader;
 import SimpleSimulation.renderer.Shaders;
+import SimpleSimulation.util.Data;
+import SimpleSimulation.util.Time;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fKt;
 import org.joml.Vector3f;
@@ -23,6 +25,12 @@ public class GameScene extends Scene{
 
     private BallSimulation simulation;
     private ScreenBuffer screenBuffer;
+    private float[] quadVertices = {
+            -1.0f,-1.0f,
+            1.0f,-1.0f,
+            1.0f,1.0f,
+            -1.0f,1.0f
+    };
 
 
 
@@ -30,14 +38,12 @@ public class GameScene extends Scene{
     @Override
     public void init() {
         Shaders.loadShaders();
-        int particleCount = 10;
-        float particleRadius = .002f;
+        int particleCount = 1;
+        float particleRadius = .02f;
         circle = new InstancedModel("/assets/models/circle.obj",particleCount,particleRadius);
         simulation =  new BallSimulation(particleCount,particleRadius,1f);
 
-
         camera = new Camera(new Vector3f(0.0f,0.0f,-1.0f),0);
-
 
         screenBuffer = new ScreenBuffer();
 
@@ -51,7 +57,11 @@ public class GameScene extends Scene{
     @Override
     public void update(double dt) {
 
+        double startTime = Time.getTime();
         float[] positions = simulation.update(dt);
+        double endTime = Time.getTime();
+        Data.simulationUpdateTime += endTime - startTime;
+        Data.simulationUpdates ++;
         circle.setBufferData(positions);
         render();
     }

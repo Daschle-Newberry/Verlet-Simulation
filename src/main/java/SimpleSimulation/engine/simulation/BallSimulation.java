@@ -1,10 +1,13 @@
 package SimpleSimulation.engine.simulation;
 
+import SimpleSimulation.util.Data;
+import SimpleSimulation.util.Time;
+
 import java.util.Arrays;
 
 public class BallSimulation {
     private float[] g = new float[]{0,-1};
-    private int substeps = 16;
+    private int substeps = 1;
 
     private Particle[] particles;
     private int particleCount;
@@ -24,7 +27,7 @@ public class BallSimulation {
         this.maxParticles = maxParticles;
         this.particleRadius = particleRadius;
         this.particlePositions = new float[maxParticles*5];
-        particleGrid = new CollisionGrid(size,Math.round(size/particleRadius));
+        particleGrid = new CollisionGrid(size, (int)Math.ceil(size/particleRadius) + 1);
 
     }
 
@@ -49,14 +52,14 @@ public class BallSimulation {
         if(particle.y() < boundingBox.getBottom()){
             particle.setY(boundingBox.getBottom());
         }
-
-    }
-
-    private void correctParticleCollisions(Particle particleA, Particle particleB) {
-        if (particleA == null || particleB == null || particleA == particleB) {
-            return;
+        if(particle.y() > boundingBox.getTop()){
+            particle.setY(boundingBox.getTop());
         }
 
+
+    }
+    private void correctParticleCollisions(Particle particleA, Particle particleB) {
+        Data.collisionChecks ++;
         float distX = (particleA.x() - particleB.x()) * (particleA.x() - particleB.x());
         float distY = (particleA.y() - particleB.y()) * (particleA.y() - particleB.y());
         float distance = distX + distY;
@@ -80,24 +83,46 @@ public class BallSimulation {
         }
 
     }
+    private void checkCells(Cell cellA, Cell cellB){
+        for(Particle particleA : cellA.get()){
+            for(Particle particleB : cellB.get()){
+                if(particleA != particleB){
+                    correctParticleCollisions(particleA,particleB);
+                }
+            }
+        }
+    }
+    private void checkParticleCollisionsNaive(){
+        for(Particle particleA : particles){
+            for(Particle particleB : particles){
+                if(particleA != particleB){
+                    correctParticleCollisions(particleA,particleB);
+                }
+            }
+        }
+    }
     private void checkParticleCollisions(){
-        Particle[][] grid = particleGrid.getGrid();
+        Cell[][] grid = particleGrid.getGrid();
         for(int x = 1; x < grid.length - 1; x++){
-            for(int y = 1; y < grid[x].length - 1; y++){
+            for (int y = 1; y < grid[x].length - 1; y++){
+                Cell cellA = grid[x][y];
+                if(cellA.get().isEmpty()){
+                    continue;
+                }
                 for(int dx = -1; dx <= 1; dx++){
                     for(int dy = -1; dy <= 1; dy++){
-                        correctParticleCollisions(grid[x][y],grid[x+dx][y+dy]);
+                        Cell cellB = grid[x+dx][y + dy];
+                        checkCells(cellA,cellB);
+                        Data.cellChecks++;
                     }
                 }
             }
         }
     }
-
     private void updateParticlePositons(double dt){
         int index = 0;
         for(Particle particle : particles){
             applyGravity(particle);
-            checkBoundingCollisionsSquare(particle);
             particle.move(dt);
             particlePositions[index] = particle.x();
             particlePositions[index+1] = particle.y();
@@ -109,16 +134,18 @@ public class BallSimulation {
         }
     }
     private void addToGrid(){
+        particleGrid.resetGrid();
         for(Particle particle : particles){
+            checkBoundingCollisionsSquare(particle);
             particleGrid.addToGrid(particle);
         }
     }
     public float[] update(double dt){
         frame += 1;
         double subDT = dt/substeps;
-        if (frame % 2 == 0 && particleCount < maxParticles){
-            addParticle(-.5f,.3f,0.00006f,0.0f,particleRadius);
-            particleCount+= 2;
+        if (frame % 7 == 0 && particleCount < maxParticles){
+            addParticle(-.5f,-.5f,.0006f,0.0f,particleRadius);
+            particleCount++;
         }
         for(int step = 0; step < substeps; step++){
             addToGrid();

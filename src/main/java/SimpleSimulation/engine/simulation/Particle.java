@@ -11,6 +11,7 @@ public class Particle {
     private float[] acceleration;
     private float[] color;
     private float radius;
+    private int[] gridLocation;
 
     public Particle(float x, float y, float vX, float vY,float radius,float r, float g, float b){
 
@@ -19,6 +20,7 @@ public class Particle {
         this.acceleration = new float[] {0,0};
         this.color =  new float[]{r,g,b};
         this.radius = radius;
+        this.gridLocation = new int[2];
     }
 
     public void move(double dt){
@@ -51,11 +53,13 @@ public class Particle {
     public void setY(float y){
         this.currentPosition[1] = y;
     }
+    public void setGridLocation(int x, int y){this.gridLocation[0] = x; this.gridLocation[1] = y;}
+
 
     public float radius(){return this.radius;}
     public float r(){return this.color[0];}
     public float g(){return this.color[1];}
     public float b(){return this.color[2];}
-
+    public int[] gridLocation(){return this.gridLocation;}
 
 }
