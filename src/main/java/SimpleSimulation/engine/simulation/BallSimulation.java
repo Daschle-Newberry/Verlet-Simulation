@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class BallSimulation {
     private float[] g = new float[]{0,-1};
-    private int substeps = 1;
+    private int substeps = 8;
 
     private Particle[] particles;
     private int particleCount;
@@ -27,7 +27,7 @@ public class BallSimulation {
         this.maxParticles = maxParticles;
         this.particleRadius = particleRadius;
         this.particlePositions = new float[maxParticles*5];
-        particleGrid = new CollisionGrid(size, (int)Math.ceil(size/particleRadius) + 1);
+        particleGrid = new CollisionGrid(size + particleRadius, (int)(.5 * Math.ceil(size/particleRadius)));
 
     }
 
@@ -55,8 +55,6 @@ public class BallSimulation {
         if(particle.y() > boundingBox.getTop()){
             particle.setY(boundingBox.getTop());
         }
-
-
     }
     private void correctParticleCollisions(Particle particleA, Particle particleB) {
         Data.collisionChecks ++;
@@ -75,11 +73,11 @@ public class BallSimulation {
             float radiusRatioB = particleB.radius() / (particleA.radius() + particleB.radius());
 
 
-            particleA.setX(particleA.x() + (collisionVector[0] * (radiusRatioA * overlap)));
-            particleA.setY(particleA.y() + (collisionVector[1] * (radiusRatioA * overlap)));
+            particleA.setX(particleA.x() + (collisionVector[0] * (radiusRatioA * overlap * .75f)));
+            particleA.setY(particleA.y() + (collisionVector[1] * (radiusRatioA * overlap * .75f)));
 
-            particleB.setX(particleB.x() - (collisionVector[0] * (radiusRatioB * overlap)));
-            particleB.setY(particleB.y() - (collisionVector[1] * (radiusRatioB * overlap)));
+            particleB.setX(particleB.x() - (collisionVector[0] * (radiusRatioB * overlap * .75f)));
+            particleB.setY(particleB.y() - (collisionVector[1] * (radiusRatioB * overlap * .75f)));
         }
 
     }
@@ -92,29 +90,36 @@ public class BallSimulation {
             }
         }
     }
+
+    private void checkParticleCollisions(){
+        Cell[][] grid = particleGrid.getGrid();
+        for(int x = 1; x < grid.length - 1; x++){
+            for(int y = 1; y < grid[x].length - 1; y++){
+                if(grid[x][y].get().isEmpty()){
+                    continue;
+                }
+
+                Cell cellA  = grid[x][y];
+
+                for(int dx = -1; dx <= 1; dx++){
+                    for(int dy = -1; dy <= 1; dy++){
+                        if(grid[x + dx][y + dy].get().isEmpty()){
+                            continue;
+                        }
+                        Cell cellB = grid[x + dx][y + dy];
+                        checkCells(cellA,cellB);
+                    }
+                }
+                Data.cellChecks ++;
+            }
+        }
+    }
+
     private void checkParticleCollisionsNaive(){
         for(Particle particleA : particles){
             for(Particle particleB : particles){
                 if(particleA != particleB){
                     correctParticleCollisions(particleA,particleB);
-                }
-            }
-        }
-    }
-    private void checkParticleCollisions(){
-        Cell[][] grid = particleGrid.getGrid();
-        for(int x = 1; x < grid.length - 1; x++){
-            for (int y = 1; y < grid[x].length - 1; y++){
-                Cell cellA = grid[x][y];
-                if(cellA.get().isEmpty()){
-                    continue;
-                }
-                for(int dx = -1; dx <= 1; dx++){
-                    for(int dy = -1; dy <= 1; dy++){
-                        Cell cellB = grid[x+dx][y + dy];
-                        checkCells(cellA,cellB);
-                        Data.cellChecks++;
-                    }
                 }
             }
         }
@@ -143,9 +148,12 @@ public class BallSimulation {
     public float[] update(double dt){
         frame += 1;
         double subDT = dt/substeps;
-        if (frame % 7 == 0 && particleCount < maxParticles){
-            addParticle(-.5f,-.5f,.0006f,0.0f,particleRadius);
-            particleCount++;
+        if (particleCount < maxParticles){
+            addParticle(-.5f,.4f,.002f,0.0f,particleRadius);
+            addParticle(-.5f,.4f - (2*particleRadius),.002f,0.0f,particleRadius);
+            addParticle(-.5f,.4f - (4 * particleRadius),.002f,0.0f,particleRadius);
+
+            particleCount+=3;
         }
         for(int step = 0; step < substeps; step++){
             addToGrid();

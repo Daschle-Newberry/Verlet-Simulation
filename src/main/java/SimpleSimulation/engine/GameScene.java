@@ -25,28 +25,18 @@ public class GameScene extends Scene{
 
     private BallSimulation simulation;
     private ScreenBuffer screenBuffer;
-    private float[] quadVertices = {
-            -1.0f,-1.0f,
-            1.0f,-1.0f,
-            1.0f,1.0f,
-            -1.0f,1.0f
-    };
-
-
 
 
     @Override
     public void init() {
         Shaders.loadShaders();
-        int particleCount = 1;
-        float particleRadius = .02f;
+        int particleCount = 10000;
+        float particleRadius = .002f;
         circle = new InstancedModel("/assets/models/circle.obj",particleCount,particleRadius);
         simulation =  new BallSimulation(particleCount,particleRadius,1f);
 
         camera = new Camera(new Vector3f(0.0f,0.0f,-1.0f),0);
-
         screenBuffer = new ScreenBuffer();
-
     }
 
     @Override
@@ -76,15 +66,15 @@ public class GameScene extends Scene{
 
         Shaders.mainShader.use();
 
-
         Shaders.mainShader.uploadMat4f("viewMatrix",camera.getViewMatrix());
         Shaders.mainShader.uploadMat4f("projectionMatrix",camera.getProjectionMatrix());
-
         circle.render();
 
-
         Shaders.mainShader.detach();
-        glBindVertexArray(0);
+
+        Shaders.gridShader.use();
+
+
         //Render to screen
         screenBuffer.render();
 
