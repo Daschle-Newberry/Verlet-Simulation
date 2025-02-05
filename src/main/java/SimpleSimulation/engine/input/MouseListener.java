@@ -8,7 +8,7 @@ public class MouseListener {
 
     private boolean hasMoved;
     private double scrollX,scrollY;
-    private double xPos,yPos,lastY,lastX,dX,dY;
+    private double xPos,yPos,lastY,lastX,dX,dY,xWorldPos,yWorldPos;
 
     private boolean mouseButtonPressed[] = new boolean[3];
     private boolean isDragging;
@@ -79,10 +79,12 @@ public class MouseListener {
         return (float)get().yPos;
     }
 
+    public static float getXWorld(){return (float)get().xWorldPos;}
+    public static float getYWorld(){return (float)get().yWorldPos;}
+
     public static float getDx(){
         return (float)(get().dX);
     }
-
     public static float getDy(){
         return (float)(get().dY);
     }
@@ -90,7 +92,6 @@ public class MouseListener {
     public static float getScrollX(){
         return (float)get().scrollX;
     }
-
     public static float getScrollY(){
         return (float)get().scrollY;
     }
@@ -107,6 +108,12 @@ public class MouseListener {
         get().dY = 0;
     }
 
+    public static void processButtons(){
+        get().mouseButtonPressed[0] = false;
+        get().mouseButtonPressed[1] = false;
+        get().mouseButtonPressed[2] = false;
+    }
+
     public static boolean mouseButtonDown(int button){
         if (button < get().mouseButtonPressed.length) {
             return get().mouseButtonPressed[button];
@@ -114,4 +121,7 @@ public class MouseListener {
             return false;
         }
     }
+
+    public static void setWorldX(float x){get().xWorldPos = x;}
+    public static void setWorldY(float y){get().yWorldPos = y;}
 }

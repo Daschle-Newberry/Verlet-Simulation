@@ -1,16 +1,16 @@
 package SimpleSimulation.engine;
 
 import SimpleSimulation.engine.Camera;
+import SimpleSimulation.engine.input.MouseListener;
 import SimpleSimulation.engine.postprocessing.ScreenBuffer;
 import SimpleSimulation.engine.simulation.BallSimulation;
 import SimpleSimulation.engine.simulation.BoundingBox;
+import SimpleSimulation.renderer.BoundingBoxRenderer;
 import SimpleSimulation.renderer.Shader;
 import SimpleSimulation.renderer.Shaders;
 import SimpleSimulation.util.Data;
 import SimpleSimulation.util.Time;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fKt;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -25,17 +25,20 @@ public class GameScene extends Scene{
 
     private BallSimulation simulation;
     private ScreenBuffer screenBuffer;
+    private BoundingBoxRenderer boundingBoxRenderer;
 
 
     @Override
     public void init() {
         Shaders.loadShaders();
-        int particleCount = 10000;
+        int particleCount = 6000;
         float particleRadius = .002f;
         circle = new InstancedModel("/assets/models/circle.obj",particleCount,particleRadius);
-        simulation =  new BallSimulation(particleCount,particleRadius,1f);
+        simulation =  new BallSimulation(particleCount,particleRadius,2f);
 
-        camera = new Camera(new Vector3f(0.0f,0.0f,-1.0f),0);
+        boundingBoxRenderer =  new BoundingBoxRenderer(BoundingBox.getBoundingBoxes());
+
+        camera = new Camera();
         screenBuffer = new ScreenBuffer();
     }
 
@@ -47,11 +50,15 @@ public class GameScene extends Scene{
     @Override
     public void update(double dt) {
 
-        double startTime = Time.getTime();
-        float[] positions = simulation.update(dt);
-        double endTime = Time.getTime();
-        Data.simulationUpdateTime += endTime - startTime;
-        Data.simulationUpdates ++;
+        if(MouseListener.mouseButtonDown(0)){
+            Vector2f mouseWSP =  convertToWSP(MouseListener.getX(),MouseListener.getY());
+            MouseListener.setWorldX(mouseWSP.x);
+            MouseListener.setWorldY(mouseWSP.y);
+        }
+        float[] positions = simulation.update();
+
+        MouseListener.processButtons();
+
         circle.setBufferData(positions);
         render();
     }
@@ -73,11 +80,30 @@ public class GameScene extends Scene{
         Shaders.mainShader.detach();
 
         Shaders.gridShader.use();
-
+        Shaders.gridShader.uploadMat4f("viewMatrix",camera.getViewMatrix());
+        Shaders.gridShader.uploadMat4f("projectionMatrix",camera.getProjectionMatrix());
+        boundingBoxRenderer.render();
 
         //Render to screen
         screenBuffer.render();
-
-
     }
+
+
+    private Vector2f convertToWSP(float x, float y){
+      float ndcX = (2 * x / Window.get().width) - 1;
+      float ndcY = 1 - (2 * y / Window.get().height );
+      Matrix4f PV =  new Matrix4f();
+      camera.getProjectionMatrix().mul(camera.getViewMatrix(),PV);
+      PV.invert();
+
+      Vector4f clipCoords =  new Vector4f(ndcX, ndcY,0.0f,1.0f);
+
+      Vector4f WSP =  new Vector4f();
+
+      clipCoords.mul(PV,WSP);
+
+      return new Vector2f(WSP.x,WSP.y);
+    }
+
+
 }

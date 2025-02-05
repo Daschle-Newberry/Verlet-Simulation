@@ -74,12 +74,18 @@ public class Window {
 
         System.out.println("AVG simulation update time " + Data.simulationUpdateTime/Data.simulationUpdates);
         System.out.println("            AVG grid creation time " + Data.gridCreationtime/totalFrames);
-        System.out.println("            AVG collision check time " + Data.collisionTime/totalFrames);
-        System.out.println("                        AVG neighbor finding time " + Data.timeSpentCreatingNeighbors / totalFrames);
-        System.out.println("                        AVG collision correction time " + Data.timeSpentCorrecting/totalFrames);
-        System.out.println("                        Total collision checks " + Data.collisionChecks);
-        System.out.println("                        Collision checks per frame " + Data.collisionChecks/totalFrames);
-        System.out.println("                        Cell checks per frame " + Data.cellChecks/totalFrames);
+
+
+        System.out.println("            AVG collision time per frame " + Data.collisionTime/totalFrames);
+        System.out.println("                        AVG collision correction time per frame " + Data.collisionCorrectionTime/totalFrames);
+        System.out.println("                        Collision correcton percentage of total collision time " + Data.collisionCorrectionTime/Data.collisionTime);
+
+        System.out.println("                        AVG grid checking time per frame " + (Data.gridCheckingTime - Data.collisionCorrectionTime)/totalFrames);
+        System.out.println("                        Grid creation percentage of total collision time " +Data.gridCreationtime/Data.collisionTime);
+
+
+
+
 
 
         //Free Memory
@@ -114,7 +120,6 @@ public class Window {
         glfwSetMouseButtonCallback(glfwWindow,MouseListener::mouseButtonCallBack);
         glfwSetScrollCallback(glfwWindow,MouseListener::mouseScrollCallback);
         glfwSetKeyCallback(glfwWindow, KeyListener::keyCallBack);
-        glfwSetInputMode(glfwWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
 
         if (glfwWindow == NULL){

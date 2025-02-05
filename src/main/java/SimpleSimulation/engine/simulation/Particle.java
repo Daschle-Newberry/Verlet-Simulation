@@ -1,8 +1,5 @@
 package SimpleSimulation.engine.simulation;
 
-import SimpleSimulation.util.Vector2F;
-import SimpleSimulation.util.VectorMath;
-
 
 public class Particle {
     private float[] currentPosition;
@@ -24,6 +21,7 @@ public class Particle {
         float[] velocity = new float[]{currentPosition[0] - lastPosition[0],currentPosition[1] - lastPosition[1]};
         lastPosition[0] = currentPosition[0];
         lastPosition[1] = currentPosition[1];
+
 
 
         float x  = currentPosition[0] + velocity[0] + acceleration[0] * ((float) dt * (float)dt);

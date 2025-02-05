@@ -9,6 +9,7 @@ public class CollisionGrid {
     private float cellSize;
     private float size;
     public CollisionGrid(float size,int cellCount){
+
         this.grid = new Cell[cellCount+2][cellCount+2];
         for(int x = 0; x < cellCount+2; x++){
             for(int y = 0; y < cellCount+2; y++){
@@ -36,6 +37,6 @@ public class CollisionGrid {
 
     }
 
-    public Cell[][] getGrid() {return grid;}
+    public Cell[][] getGrid() {return this.grid;}
 
 }
