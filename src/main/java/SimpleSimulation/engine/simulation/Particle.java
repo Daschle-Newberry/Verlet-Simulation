@@ -4,6 +4,7 @@ package SimpleSimulation.engine.simulation;
 public class Particle {
     private float[] currentPosition;
     private float[] lastPosition;
+    private float[] lastVelocity;
     private float[] acceleration;
     private float[] color;
     private float radius;
@@ -12,6 +13,7 @@ public class Particle {
 
         this.currentPosition = new float[] {x,y};
         this.lastPosition = new float[] {x-vX,y-vY};
+        this.lastVelocity = new float[]{0.0f,0.0f};
         this.acceleration = new float[] {0,0};
         this.color =  new float[]{r,g,b};
         this.radius = radius;
@@ -22,13 +24,11 @@ public class Particle {
         lastPosition[0] = currentPosition[0];
         lastPosition[1] = currentPosition[1];
 
+        currentPosition[0] += (velocity[0] + lastVelocity[0])/2 + acceleration[0] * ((float) dt * (float)dt);
+        currentPosition[1] += (velocity[1] + lastVelocity[1])/2 + acceleration[1] * ((float) dt * (float)dt);
 
-
-        float x  = currentPosition[0] + velocity[0] + acceleration[0] * ((float) dt * (float)dt);
-        float y  = currentPosition[1] + velocity[1] + acceleration[1] * ((float) dt * (float)dt);
-
-        currentPosition[0] = x;
-        currentPosition[1] = y;
+        lastVelocity[0] = velocity[0];
+        lastVelocity[1] = velocity[1];
 
         acceleration[0] = 0;
         acceleration[1] = 0;

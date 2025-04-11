@@ -1,6 +1,8 @@
 package SimpleSimulation.engine.simulation;
 
 import SimpleSimulation.engine.input.MouseListener;
+import SimpleSimulation.util.Data;
+import org.w3c.dom.css.CSSImportRule;
 
 
 import java.util.ArrayList;
@@ -39,27 +41,32 @@ public class BallSimulation {
         this.particleGrid = new CollisionGrid(size + particleRadius, (int)( .5 * Math.ceil(size/particleRadius)));
         this.gravitySources =  new GravitySource[0];
 
-        for(int i = 0; i < maxParticles; i++){
-            float x = (float) ((Math.random() * 2) - 1) * (size - 2 * particleRadius);
-            float y = (float) ((Math.random() * 2) - 1) * (size - 2 * particleRadius);
-            addParticle(x,y,0,0,particleRadius);
-            particleCount++;
+        float dimensions = (float) Math.ceil(Math.sqrt(maxParticles));
+        float spacing  = 2 * particleRadius;
+
+        for(float x = -dimensions/2; x < dimensions/2 && particleCount < maxParticles; x++){
+            for(float y = -dimensions/2; y < dimensions/2 && particleCount < maxParticles; y++){
+                float posX = x * spacing;
+                float posY = y * spacing;
+                addParticle(posX,posY,(float) Math.random() * .0000001f,(float) Math.random() * .0000001f,particleRadius);
+            }
         }
 
 
+
+        for (int i = 0; i < particles.length; i++){
+            System.out.println(particles[i]);
+        }
     }
 
     private void addParticle(float x, float y, float vX, float vY, float radius){
-        if (frame % 20 == 0 && particleCount < maxParticles){
             particles = Arrays.copyOf(particles,particles.length + 1);
-            float r  = (float)(Math.tan(frame/100f) + 2)/2f;
-            float g  = (float)(Math.cos(frame/100f) + 2)/2f;;
-            float b  = (float)(Math.sin(frame/100f) + 2)/2f;
+            float r  = (float)(Math.tan(x/100f) + 1)/2f;
+            float g  = (float)(Math.cos(y/100f) + 1)/2f;
+            float b  = (float)(Math.sin(x+y/100f) + 1)/2f;
 
             particles[particles.length - 1] = new Particle(x,y,vX,vY,radius,r,g,b);
-
-            particleCount += 1;
-        }
+            particleCount ++;
     }
 
     private void checkBoundingCollisionsSquare(Particle particle) {
@@ -78,6 +85,7 @@ public class BallSimulation {
         }
     }
     private void correctParticleCollisions(Particle particleA, Particle particleB) {
+        Data.collisionChecks++;
         float distX = (particleA.x() - particleB.x()) * (particleA.x() - particleB.x());
         float distY = (particleA.y() - particleB.y()) * (particleA.y() - particleB.y());
         float distance = distX + distY;
@@ -110,9 +118,6 @@ public class BallSimulation {
         }
     }
 
-
-
-
     private void checkParticleCollisions(){
         Cell[][] grid = particleGrid.getGrid();
         for(int x = 1; x < grid.length - 1; x++){
@@ -133,7 +138,16 @@ public class BallSimulation {
             }
         }
     }
-    
+
+    private void checkParticleCollisionsNaive(){
+        for(Particle a : particles){
+            for(Particle b : particles){
+                if(a != b){
+                    correctParticleCollisions(a,b);
+                }
+            }
+        }
+    }
 
     private void updateParticlePositons(double dt){
         int index = 0;
@@ -185,9 +199,10 @@ public class BallSimulation {
     }
     public float[] update(){
         processUserInput();
-        addParticle(0,0.0f,0.0f,0.0f,particleRadius);
+
         double subDT = fixedDT/substeps;
         for(int step = 0; step < substeps; step++) {
+            Data.simulationUpdates++;
             addToGrid();
             checkParticleCollisions();
             updateParticlePositons(subDT);

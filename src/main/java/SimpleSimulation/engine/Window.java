@@ -4,11 +4,13 @@ import SimpleSimulation.engine.input.KeyListener;
 import SimpleSimulation.engine.input.MouseListener;
 import SimpleSimulation.util.Data;
 import SimpleSimulation.util.Time;
-import org.jfree.data.json.JSONUtils;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
+import java.nio.Buffer;
+import java.nio.IntBuffer;
+import java.security.spec.RSAOtherPrimeInfo;
 import java.sql.SQLOutput;
 
 import static org.lwjgl.glfw.Callbacks.*;
@@ -23,9 +25,6 @@ public class Window {
     private String title;
     private long glfwWindow;
 
-    public float r,g,b,a;
-    private boolean fadeToBlack = false;
-
     private static Window window = null;
 
     private static Scene currentScene;
@@ -38,27 +37,8 @@ public class Window {
     private static double highestRenderTime;
 
     private Window() {
-        this.width = 2560;
-        this.height = 1440;
-        this.title = "Test";
-        r = 0;
-        g = 0;
-        b = 0;
-        a = 1;
     }
 
-    public static void changeScene(int newScene){
-        switch (newScene){
-            case 0:
-                currentScene = new GameScene();
-                currentScene.init();
-                glfwSetFramebufferSizeCallback(Window.get().glfwWindow, currentScene::framebufferSizeCallback);
-
-                break;
-            default:
-                assert false: "Unknown Scene " + newScene + ".";
-        }
-    }
     public static Window get(){
         if (Window.window == null){
             Window.window = new Window();
@@ -67,21 +47,18 @@ public class Window {
         return Window.window;
     }
 
-    public void run(){
+    private static void framebufferSizeCallback(long window, int width, int height){
+        Window.get().width = width;
+        Window.get().height = height;
+        currentScene.framebufferSizeCallback(window,width,height);
+    }
+    public void run() {
         System.out.println("Hello LWJGL" + Version.getVersion());
         init();
         loop();
 
-        System.out.println("AVG simulation update time " + Data.simulationUpdateTime/Data.simulationUpdates);
-        System.out.println("            AVG grid creation time " + Data.gridCreationtime/totalFrames);
-
-
-        System.out.println("            AVG collision time per frame " + Data.collisionTime/totalFrames);
-        System.out.println("                        AVG collision correction time per frame " + Data.collisionCorrectionTime/totalFrames);
-        System.out.println("                        Collision correcton percentage of total collision time " + Data.collisionCorrectionTime/Data.collisionTime);
-
-        System.out.println("                        AVG grid checking time per frame " + (Data.gridCheckingTime - Data.collisionCorrectionTime)/totalFrames);
-        System.out.println("                        Grid creation percentage of total collision time " +Data.gridCreationtime/Data.collisionTime);
+        System.out.println("AVG collision checks per frame " + Data.collisionChecks/Data.simulationUpdates);
+        System.out.println("AVG render time " + Data.totalRenderTime / Data.totalRenders);
 
 
 
@@ -106,6 +83,11 @@ public class Window {
         }
 
         //Configure Window
+        GLFWVidMode mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        this.width = mode.width();
+        this.height = mode.height();
+        this.title = "Simulation";
+
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE,GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE,GLFW_TRUE);
@@ -120,6 +102,7 @@ public class Window {
         glfwSetMouseButtonCallback(glfwWindow,MouseListener::mouseButtonCallBack);
         glfwSetScrollCallback(glfwWindow,MouseListener::mouseScrollCallback);
         glfwSetKeyCallback(glfwWindow, KeyListener::keyCallBack);
+        glfwSetFramebufferSizeCallback(Window.get().glfwWindow, Window::framebufferSizeCallback);
 
 
         if (glfwWindow == NULL){
@@ -131,57 +114,49 @@ public class Window {
         glfwMakeContextCurrent(glfwWindow);
 
         //Enable V-SYNC
-        glfwSwapInterval(1);
+        glfwSwapInterval(0);
 
         //Show Window
         glfwShowWindow(glfwWindow);
 
-       GL.createCapabilities();
+        GL.createCapabilities();
 
-       glEnable(GL_DEPTH_TEST);
-       glEnable(GL_CULL_FACE);
-       glEnable(GL_MULTISAMPLE);
-       glfwSetWindowSize(glfwWindow,this.width,this.height);
-       glViewport(0,0,width,height);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_MULTISAMPLE);
+        glfwSetWindowSize(glfwWindow,this.width,this.height);
+        glViewport(0,0,width,height);
 
 
-        Window.changeScene(0);
+        currentScene = new MainScene();
+        currentScene.init();
     }
 
-
-    public void loop(){
+    public void loop() {
         double beginTime = Time.getTime();
         double endTime;
         double dt = -1.0f;
 
-        double renderStart;
-        double renderEnd;
+        double frameTime = 1.0f/144.0;
         while(!glfwWindowShouldClose(glfwWindow)){
             //Poll Events
             glfwPollEvents();
 
-            renderStart = Time.getTime();
-            if (dt >= 0){
-                currentScene.update(dt);
-            }
-            renderEnd = Time.getTime();
-
-            double renderTime = (renderEnd-renderStart);
-
-            if(renderTime > highestRenderTime | highestRenderTime < 0){
-                highestRenderTime = renderTime;
-            }
-
-            totalRenderTime += renderTime;
-
+            currentScene.update(dt);
+            
             glfwSwapBuffers(glfwWindow);
 
             endTime = Time.getTime();
             dt = endTime - beginTime;
-            totalFrames += 1;
-            totalTime += dt;
-            if(1/dt < lowestFrameRate | lowestFrameRate < 0){
-                lowestFrameRate = 1/dt;
+
+
+
+            if(frameTime - dt > 0){
+                try {
+                    Thread.sleep((long) (1000 * (frameTime - dt)));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
             glfwSetWindowTitle(glfwWindow,"FPS " + 1/dt);
             beginTime = endTime;

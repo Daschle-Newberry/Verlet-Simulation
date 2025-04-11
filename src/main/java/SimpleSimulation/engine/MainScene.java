@@ -1,23 +1,20 @@
 package SimpleSimulation.engine;
 
-import SimpleSimulation.engine.Camera;
 import SimpleSimulation.engine.input.MouseListener;
 import SimpleSimulation.engine.postprocessing.ScreenBuffer;
 import SimpleSimulation.engine.simulation.BallSimulation;
 import SimpleSimulation.engine.simulation.BoundingBox;
 import SimpleSimulation.renderer.BoundingBoxRenderer;
-import SimpleSimulation.renderer.Shader;
 import SimpleSimulation.renderer.Shaders;
+
 import SimpleSimulation.util.Data;
 import SimpleSimulation.util.Time;
 import org.joml.*;
-import org.lwjgl.BufferUtils;
 
-import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL30.*;
 
-public class GameScene extends Scene{
+public class MainScene extends Scene{
 
     private Camera camera;
 
@@ -31,8 +28,8 @@ public class GameScene extends Scene{
     @Override
     public void init() {
         Shaders.loadShaders();
-        int particleCount = 6000;
-        float particleRadius = .002f;
+        int particleCount = 10000;
+        float particleRadius = .007f;
         circle = new InstancedModel("/assets/models/circle.obj",particleCount,particleRadius);
         simulation =  new BallSimulation(particleCount,particleRadius,2f);
 
@@ -55,12 +52,21 @@ public class GameScene extends Scene{
             MouseListener.setWorldX(mouseWSP.x);
             MouseListener.setWorldY(mouseWSP.y);
         }
+
+
         float[] positions = simulation.update();
+
+
 
         MouseListener.processButtons();
 
         circle.setBufferData(positions);
+
+        double startTime = Time.getTime();
         render();
+        double endTime = Time.getTime();
+        Data.totalRenderTime += (endTime - startTime);
+        Data.totalRenders++;
     }
 
     @Override
@@ -85,6 +91,7 @@ public class GameScene extends Scene{
         boundingBoxRenderer.render();
 
         //Render to screen
+
         screenBuffer.render();
     }
 

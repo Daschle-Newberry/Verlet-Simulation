@@ -40,8 +40,7 @@ public class CollisionWorker implements Runnable {
 
     private void checkCells(Cell cellA, Cell cellB){
         for(Particle particleA : cellA.get()){
-            for(Particle particleB : cellB.get()){
-                if(particleA != particleB){
+            for(Particle particleB : cellB.get()){                if(particleA != particleB){
                     correctParticleCollisions(particleA,particleB);
                 }
             }
