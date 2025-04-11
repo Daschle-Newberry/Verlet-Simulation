@@ -1,2 +1,2 @@
-![Demo](./assets/gif/Simulationgif.gif)
+![Demo](src/main/resources/assets/gif/Simulationgif.gif)
 
