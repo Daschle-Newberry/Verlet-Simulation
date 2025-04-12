@@ -1,4 +1,4 @@
-![Demo](src/main/resources/assets/gif/Simulationgif.gif)
+![Alt](src/main/resources/assets/gif/Simulationgif.gif "simulationgif")
 
 This project is a Verlet integration particle simulation that is capable of simulating up to ten thousand particles at 60 FPS using purely sequential CPU compute. 
 
