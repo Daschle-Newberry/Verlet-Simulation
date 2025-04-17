@@ -39,9 +39,30 @@ The beauty of this equation is the simplicity and stability of the particle syst
 
 <h2> Optimizations </h2>
 
+<h3> Grid Based Collision Algorithm </h3>
+
 While the Verlet integration is fast to calculate, particle collisions are not. In fact, the naive (brute force) approach to particle collisions is an O(n^2) algorithm, which is incredibly slow. The naive approach can simulate 900 particles at ~60fps on a single thread on my 7800x3d. There is a fairly simple (in theory) way to scale down the amount of particle to particle collisions though. If we create a 2D array, acting as a grid, we can break particles down into cells. These cells are then used to check particles against particles who are within their spatial region. This algorithm still has a worst-case time complexity of O(n^2), but has a best case scenario of O(n). Due to collisions, a single particle should only ever be compared to 18 other particles (assuming 2 particles per cell), which is MUCH faster than comparing every particle to every other particle. In testing, I got the following performance results:
 
 | Method | Particles | Collision Checks per Simulation Frame | FPS  |
 |--------|-----------|----------------------------------------|------|
 | Naive  | 6,000     | 48,147                                 | ~140 |
 | Grid   | 6,000     | 35,994,000                             | ~1   |
+| Naive  | 10,000     | 87,374                                 | ~75 |
+| Grid   | 10,000     | 99,990,000                              | ~.3  |
+
+As you can see, the grid based approach results in a massive performance increase over the naive approach.
+
+<h3> GPU Instancing </h3>
+Drawing the scene to the screen also introduces a bottleneck when simulating thousands of particles. Whenever a particle is drawn, the CPU has to issue a costly operation called a draw call, which sends the key information to the GPU on what to draw. Draw calls usually aren't a performance issue if you are only drawing a thousand to a few thousands objects (depending on the system). In the case of this simulation though, we are drawing upwards of 10,000 objects to the screen. The performace hit from these draw calls is large, especially since the CPU is already doing thousands of calculations per frame for the simulation. To get around this, we use something call GPU instancing, which utilizes the same mesh data to draw objects. We first send in the mesh data using a buffer, which then lives on the GPU for the life of the application. Then, we send a second buffer per frame called the instance buffer. This buffer contain the particle positon (in matrix form) and particle color. This data is then parsed on the GPU and used to draw each particle. This method takes the total draw calls from O(n) to O(1), which results in a sizeable performance increase:
+
+| Method       | Particles    | Render Time   | FPS  |
+|--------------|--------------|---------------|------|
+| Regular      | 6,000  | 8,236 ns            | ~140 |  
+| Instancing   | 6,000  | 35,994,000          | ~1   | 
+| Regular      | 10,000 | 8,236 ns            | ~140 |
+| Instancing   | 10,000 | 35,994,000          | ~1   |    
+
+
+
+
+
