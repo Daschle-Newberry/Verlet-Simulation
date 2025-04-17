@@ -30,6 +30,8 @@ java -jar C:\Users\...\path\to\the\jar
 
 <h2> Why Verlet? <h2>
 
-The Verlet integration is an incredibly cheap way to simulate physics based off a particles current and previous positions. You can calculate an objects new position based on the following equation:
+<p>The Verlet integration is an incredibly cheap way to simulate physics based off a particles current and previous positions. You can calculate an objects new position based on the following equation:<p>
 
 ![verletintegration](https://github.com/user-attachments/assets/afdfa095-b12f-422b-a051-7af170b18db9)
+
+The beauty of this equation is the simplicity and stability of the particle systems it is deployed in. Since velocity is calculated by subtracting the current position from the previous position, it avoids cumbersome velocity calculations that can accumulate errors. This also means that velocity changes from collisions are handled automatically, which makes particle collisions much easier to calculate.
