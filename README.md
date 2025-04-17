@@ -35,3 +35,13 @@ The Verlet integration is an incredibly cheap way to simulate physics based off 
 ![verletintegration](https://github.com/user-attachments/assets/afdfa095-b12f-422b-a051-7af170b18db9)
 
 The beauty of this equation is the simplicity and stability of the particle systems it is deployed in. Since velocity is calculated by subtracting the current position from the previous position, it avoids cumbersome velocity calculations that can accumulate errors. This also means that velocity changes from collisions are handled automatically, which makes particle collisions much easier to calculate.
+
+
+<h2> Optimizations </h2>
+
+While the Verlet integration is fast to calculate, particle collisions are not. In fact, the naive (brute force) approach to particle collisions is an O(n^2) algorithm, which is incredibly slow. The naive approach can simulate 900 particles at ~60fps on a single thread on my 7800x3d. There is a fairly simple (in theory) way to scale down the amount of particle to particle collisions though. If we create a 2D array, acting as a grid, we can break particles down into cells. These cells are then used to check particles against particles who are within their spatial region. This algorithm still has a worst-case time complexity of O(n^2), but has a best case scenario of O(n). Due to collisions, a single particle should only ever be compared to 18 other particles (assuming 2 particles per cell), which is MUCH faster than comparing every particle to every other particle. In testing, I got the following performance results:
+
+|     | Particles  |Collision Checks per Simulation Frame| FPS|
+|-----|------|------|------|------|
+| Naive |  6,000 |  48,147 | ~140 |
+| Grid  | 6,000  | 35,994,000| ~1|
