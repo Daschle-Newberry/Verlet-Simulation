@@ -45,10 +45,10 @@ While the Verlet integration is fast to calculate, particle collisions are not. 
 
 | Method | Particles | Collision Checks per Simulation Frame | FPS  |
 |--------|-----------|----------------------------------------|------|
-| Naive  | 6,000     | 48,147                                 | ~140 |
-| Grid   | 6,000     | 35,994,000                             | ~1   |
-| Naive  | 10,000     | 87,374                                 | ~75 |
-| Grid   | 10,000     | 99,990,000                              | ~.3  |
+| Grid  | 6,000     | 48,147                                 | ~140 |
+| Naive   | 6,000     | 35,994,000                             | ~1   |
+| Grid  | 10,000     | 87,374                                 | ~75 |
+| Naive   | 10,000     | 99,990,000                              | ~.3  |
 
 As you can see, the grid based approach results in a massive performance increase over the naive approach.
 
