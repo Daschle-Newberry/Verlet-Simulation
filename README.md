@@ -1,4 +1,4 @@
-![Alt](src/main/resources/assets/gif/Simulationgif.gif "simulationgif")
+![Alt](src/main/resources/assets/gif/Simulationgif.gif "simulation.gif")
 
 This project is a Verlet integration particle simulation that is capable of simulating up to ten thousand particles at 60 FPS using purely sequential CPU compute. 
 
@@ -32,7 +32,7 @@ java -jar C:\Users\...\path\to\the\jar
 
 The Verlet integration is an incredibly cheap way to simulate physics based off a particles current and previous positions. You can calculate an objects new position based on the following equation:
 
-![verletintegration](https://github.com/user-attachments/assets/afdfa095-b12f-422b-a051-7af170b18db9)
+![Alt](https://github.com/user-attachments/assets/afdfa095-b12f-422b-a051-7af170b18db9 "vertletintegrationequation.png")
 
 The beauty of this equation is the simplicity and stability of the particle systems it creates. Since velocity is calculated by subtracting the last position from the current position, it avoids cumbersome velocity calculations that can accumulate errors. This also means that velocity changes from collisions are handled automatically, which makes particle collisions much easier to calculate.
 
