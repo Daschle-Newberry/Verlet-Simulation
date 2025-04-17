@@ -50,7 +50,7 @@ While the Verlet integration is fast to calculate, particle collisions are not. 
 | Grid  | 10,000     | 87,374                                 | ~75 |
 | Naive   | 10,000     | 99,990,000                              | ~.3  |
 
-As you can see, the grid based approach results in a massive performance increase over the naive approach.
+As you can see, the grid based approach results in a massive performance increase over the naive approach. In fact, at 10,000 particles we see a performance gain of 23,333%.
 
 ### GPU Instancing 
 Drawing the scene to the screen also introduces a bottleneck when simulating thousands of particles. Whenever a particle is drawn, the CPU has to issue a costly operation called a draw call, which sends the key information to the GPU on what to draw. Draw calls usually aren't a performance issue if you are only drawing a thousand to a few thousands objects (depending on the system). In the case of this simulation, though, we are drawing upwards of 10,000 objects to the screen. The performance hit from these draw calls is large, especially since the CPU is already doing thousands of calculations per frame for the simulation. To get around this, we use something call GPU instancing, which utilizes the same mesh data to draw objects. We first send in the mesh data using a buffer, which then lives on the GPU for the life of the application. Then, we send a second buffer per frame called the instance buffer. The instance buffer contains the particle position (in matrix form) and particle color. This data is then parsed on the GPU and used to draw each particle. This method takes the total draw calls from O(n) to O(1), which can result in a sizeable performance increase:
@@ -63,7 +63,7 @@ Drawing the scene to the screen also introduces a bottleneck when simulating tho
 | Regular      | 10,000 | 13,274            | ~70 |
 | Instancing   | 10,000 | 134        | ~95   |   
 
-With GPU instancing, we see about a 98% - 99% decrease in render time. While this seems like a lot, we were only spending .008ms drawing the scene with regular draw calls, so it doesn't have as massive of a performance increase as the grid optimization. The result however does see about a 17% - 26% increase in FPS, which is not insignificant. 
+With GPU instancing, we see about a 98% - 99% decrease in render time. While this seems like a lot, we were only spending .008ms drawing the scene with regular draw calls, so it doesn't have as massive of a performance increase as the grid optimization. The result however does see about a 21% - 35% increase in FPS, which is not insignificant. 
 
 
 
