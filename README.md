@@ -41,7 +41,7 @@ The beauty of this equation is the simplicity and stability of the particle syst
 
 While the Verlet integration is fast to calculate, particle collisions are not. In fact, the naive (brute force) approach to particle collisions is an O(n^2) algorithm, which is incredibly slow. The naive approach can simulate 900 particles at ~60fps on a single thread on my 7800x3d. There is a fairly simple (in theory) way to scale down the amount of particle to particle collisions though. If we create a 2D array, acting as a grid, we can break particles down into cells. These cells are then used to check particles against particles who are within their spatial region. This algorithm still has a worst-case time complexity of O(n^2), but has a best case scenario of O(n). Due to collisions, a single particle should only ever be compared to 18 other particles (assuming 2 particles per cell), which is MUCH faster than comparing every particle to every other particle. In testing, I got the following performance results:
 
-|     | Particles  |Collision Checks per Simulation Frame| FPS|
-|-----|------|------|------|------|
-| Naive |  6,000 |  48,147 | ~140 |
-| Grid  | 6,000  | 35,994,000| ~1|
+| Method | Particles | Collision Checks per Simulation Frame | FPS  |
+|--------|-----------|----------------------------------------|------|
+| Naive  | 6,000     | 48,147                                 | ~140 |
+| Grid   | 6,000     | 35,994,000                             | ~1   |
