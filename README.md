@@ -27,3 +27,9 @@ java -jar C:\Users\...\path\to\the\jar
 ```
 
 </p>
+
+<h2> Why Verlet? <h2>
+
+The Verlet integration is an incredibly cheap way to simulate physics based off a particles current and previous positions. You can calculate an objects new position based on the following equation:
+
+![verletintegration](https://github.com/user-attachments/assets/afdfa095-b12f-422b-a051-7af170b18db9)
