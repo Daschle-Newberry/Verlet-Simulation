@@ -60,7 +60,9 @@ Drawing the scene to the screen also introduces a bottleneck when simulating tho
 | Regular      | 6,000  | 8,236            | ~115 |  
 | Instancing   | 6,000  | 123         | ~140   | 
 | Regular      | 10,000 | 13,274            | ~70 |
-| Instancing   | 10,000 | 134        | ~95   |    
+| Instancing   | 10,000 | 134        | ~95   |   
+
+With GPU instancing we see about a 98% - 99% decrease in render time. While this seems like a lot, we were only spending .008ms drawing the scene with regular draw calls, so it doesn't have as massive of a performace increase as the grid optimization. The result however does see about a 26% increase in FPS, which not insignificant. 
 
 
 
